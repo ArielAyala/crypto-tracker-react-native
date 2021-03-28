@@ -18,10 +18,9 @@ class CoinsScreen extends Component {
         this.setState({ coins: res.data, loading: false });
     }
 
-    handlePress = () => {
-        // console.log('go to detail', this.props)
+    handlePress = (coin) => {
 
-        this.props.navigation.navigate("CoinDetail");
+        this.props.navigation.navigate("CoinDetail", { coin });
     }
 
     render() {
@@ -39,7 +38,10 @@ class CoinsScreen extends Component {
                 <FlatList
                     data={coins}
                     renderItem={({ item }) =>
-                        <CoinsItem item={item} />
+                        <CoinsItem
+                            item={item}
+                            onPress={() => this.handlePress(item)}
+                        />
                     }
                 />
             </View>
