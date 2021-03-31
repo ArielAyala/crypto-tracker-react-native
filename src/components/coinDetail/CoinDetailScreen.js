@@ -1,12 +1,15 @@
 import React, { Component } from 'react';
-import { View, Text, Image, StyleSheet, SectionList } from 'react-native';
+import { View, Text, Image, StyleSheet, SectionList, FlatList } from 'react-native';
 import Colors from '../../res/colors';
+import Http from '../../libs/http';
+import CoinMarketItem from './CoinMarketItem';
 
 
 class CoinDetailScreen extends Component {
 
     state = {
-        coin: {}
+        coin: {},
+        markets: []
     }
 
     getSymbolIcon = (name) => {
@@ -36,17 +39,25 @@ class CoinDetailScreen extends Component {
         return sections;
     }
 
+    getMarkets = async (coinId) => {
+        const url = `https://api.coinlore.net/api/coin/markets/?id=${coinId}`;
+        const markets = await Http.instance.get(url);
+        this.setState({ markets });
+    }
+
     componentDidMount() {
         const { coin } = this.props.route.params;
 
         this.props.navigation.setOptions({ title: coin.symbol });
+
+        this.getMarkets(coin.id);
 
         this.setState({ coin });
     }
 
     render() {
 
-        const { coin } = this.state
+        const { coin, markets } = this.state
         return (
             <View style={styles.container}>
                 <View style={styles.subHeader}>
@@ -57,6 +68,7 @@ class CoinDetailScreen extends Component {
                     <Text style={styles.titleText}>{coin.name}</Text>
                 </View>
                 <SectionList
+                    style={styles.section}
                     sections={this.getSections(coin)}
                     keyExtractor={(item) => item}
                     renderItem={({ item }) =>
@@ -70,6 +82,16 @@ class CoinDetailScreen extends Component {
                         </View>
                     }
                 />
+
+                <Text style={styles.marketsTitle}>Markets</Text>
+                <Text>
+                    <FlatList
+                        style={styles.list}
+                        horizontal={true}
+                        data={markets}
+                        renderItem={({ item }) => <CoinMarketItem item={item} />}
+                    />
+                </Text>
             </View>
         );
     }
@@ -95,6 +117,14 @@ const styles = StyleSheet.create({
         width: 25,
         height: 25
     },
+    section: {
+        maxHeight: 220,
+        paddingLeft: 16
+    },
+    list: {
+        maxHeight: 100,
+
+    },
     sectionHeader: {
         backgroundColor: 'rgba(0,0,0,0.2)',
         padding: 8
@@ -110,6 +140,13 @@ const styles = StyleSheet.create({
         color: Colors.white,
         fontSize: 14,
         fontWeight: 'bold'
+    },
+    marketsTitle: {
+        color: Colors.white,
+        fontSize: 16,
+        fontWeight: 'bold',
+        marginBottom: 16,
+        marginLeft: 16
     }
 })
 
