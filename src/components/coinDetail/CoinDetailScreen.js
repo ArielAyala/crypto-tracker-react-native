@@ -4,6 +4,7 @@ import Colors from '../../res/colors';
 import Http from '../../libs/http';
 import CoinMarketItem from './CoinMarketItem';
 import Storage from '../../libs/storage';
+import Formater from '../../libs/formater';
 
 
 class CoinDetailScreen extends Component {
@@ -22,6 +23,9 @@ class CoinDetailScreen extends Component {
         }
     }
 
+    /**
+     * Save to storage as a favorite coin
+     */
     addFavorite = async () => {
         const coin = JSON.stringify(this.state.coin)
         const key = `favorite-${this.state.coin.id}`;
@@ -52,7 +56,10 @@ class CoinDetailScreen extends Component {
 
     }
 
-    getFavorite = async () => {
+    /**
+     * Check into the storage if the coin is into the storage as a 'favorite'
+     */
+    checkIsFavorite = async () => {
         try {
             const key = `favorite-${this.state.coin.id}`;
             const favoriteString = await Storage.instance.get(key);
@@ -65,6 +72,11 @@ class CoinDetailScreen extends Component {
         }
     }
 
+    /**
+     * Get from the images api the coin's icon/symbol
+     * @param {*} name Use the coin name getted from the api
+     * @returns Return a text for create uri into the Image source params.
+     */
     getSymbolIcon = (name) => {
         if (name) {
             const symbol = name.toLowerCase().replace(' ', '-');
@@ -73,25 +85,34 @@ class CoinDetailScreen extends Component {
 
     }
 
+    /**
+     * Create sections for SectionList
+     * @param {*} coin 
+     * @returns 
+     */
     getSections = (coin) => {
         const sections = [
             {
                 title: 'Market cap',
-                data: [coin.market_cap_usd]
+                data: [`$ ${Formater.formatWithThousandsSeparator(coin.market_cap_usd)}`]
             },
             {
                 title: 'Volume 24h',
-                data: [coin.volume24]
+                // data: [coin.volume24],
+                data: [`$ ${Formater.formatWithThousandsSeparator(coin.volume24)}`]
             },
             {
                 title: 'Change 24h',
-                data: [coin.percent_change_24h]
+                data: [`${coin.percent_change_24h}%`]
             }
         ];
 
         return sections;
     }
 
+    /**
+     * Get markets where the selected coin is operating
+     */
     getMarkets = async (coinId) => {
         const url = `https://api.coinlore.net/api/coin/markets/?id=${coinId}`;
         const markets = await Http.instance.get(url);
@@ -106,7 +127,7 @@ class CoinDetailScreen extends Component {
         this.getMarkets(coin.id);
 
         this.setState({ coin }, () => {
-            this.getFavorite()
+            this.checkIsFavorite()
         });
     }
 
@@ -161,7 +182,7 @@ class CoinDetailScreen extends Component {
                         style={styles.list}
                         horizontal={true}
                         data={markets}
-                        renderItem={({ item }) => <CoinMarketItem item={item} />}
+                        renderItem={({ item, index }) => <CoinMarketItem item={item} />}
                     />
                 </Text>
             </View>
