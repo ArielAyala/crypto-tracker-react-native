@@ -12,7 +12,8 @@ class CoinDetailScreen extends Component {
     state = {
         coin: {},
         markets: [],
-        isFavorite: false
+        isFavorite: false,
+        cotizacionDolar: 0
     }
 
     toogleFavorite = () => {
@@ -119,6 +120,14 @@ class CoinDetailScreen extends Component {
         this.setState({ markets });
     }
 
+    getCotizacionDolar = async () => {
+        const cotizacion = await Http.instance.get('https://dolar.melizeche.com/api/1.0/');
+        if (cotizacion) {
+            const { dolarpy } = cotizacion;
+            this.setState({ cotizacionDolar: dolarpy.bcp.compra })
+        }
+    }
+
     componentDidMount() {
         const { coin } = this.props.route.params;
 
@@ -126,14 +135,19 @@ class CoinDetailScreen extends Component {
 
         this.getMarkets(coin.id);
 
+        this.getCotizacionDolar()
+
         this.setState({ coin }, () => {
             this.checkIsFavorite()
-        });
+        })
+
     }
 
     render() {
 
-        const { coin, markets, isFavorite } = this.state
+        const { coin, markets, isFavorite, cotizacionDolar } = this.state;
+        const priceGuarani = coin.price_usd * cotizacionDolar;
+        const priceGuaraniFormated = Formater.formatWithThousandsSeparator(priceGuarani);
         return (
             // SECTION COIN DETAIL
             <View style={styles.container}>
@@ -146,7 +160,7 @@ class CoinDetailScreen extends Component {
                         <Text style={styles.titleText}>{coin.name}</Text>
                     </View>
 
-
+                    {/* BUTTON FOR SET/REMOVE FAVORITE */}
                     <Pressable
                         onPress={this.toogleFavorite}
                         style={[
@@ -158,21 +172,31 @@ class CoinDetailScreen extends Component {
                     >
                         <Text style={styles.btnFavoriteText}> {isFavorite ? 'Remove favorite' : 'Add favorite'} </Text>
                     </Pressable>
+
                 </View>
+
+                <View style={styles.priceContainer}>
+                    <Text style={styles.priceTitle}>Price</Text>
+                    <Text style={styles.priceText}>{`$ ${coin.price_usd}`}</Text>
+                    <Text style={styles.priceText}>{`₲ ${priceGuaraniFormated}`}</Text>
+                </View>
+
                 <SectionList
                     style={styles.section}
                     sections={this.getSections(coin)}
                     keyExtractor={(item) => item}
-                    renderItem={({ item }) =>
-                        <View style={styles.sectionItem}>
-                            <Text style={styles.itemText}>{item}</Text>
-                        </View>
-                    }
+
                     renderSectionHeader={({ section }) =>
                         <View style={styles.sectionHeader}>
                             <Text style={styles.sectionText}>{section.title}</Text>
                         </View>
                     }
+                    renderItem={({ item }) =>
+                        <View style={styles.sectionItem}>
+                            <Text style={styles.itemText}>{item}</Text>
+                        </View>
+                    }
+
                 />
 
                 {/* SECTION MARKETS */}
@@ -182,6 +206,7 @@ class CoinDetailScreen extends Component {
                         style={styles.list}
                         horizontal={true}
                         data={markets}
+                        keyExtractor={(item, index) => index.toString()}
                         renderItem={({ item, index }) => <CoinMarketItem item={item} />}
                     />
                 </Text>
@@ -214,9 +239,24 @@ const styles = StyleSheet.create({
         width: 25,
         height: 25
     },
+    priceContainer: {
+        marginTop:15,
+        marginBottom: 15
+    },
+    priceTitle: {
+        textAlign: 'center',
+        color: Colors.white,
+        fontSize: 17,
+        fontWeight: 'bold'
+    },
+    priceText: {
+        color: Colors.white,
+        textAlign: 'center'
+    },
     section: {
-        maxHeight: 220,
-        paddingLeft: 16
+        maxHeight: 230,
+        paddingLeft: 16,
+        marginBottom: 15
     },
     list: {
         maxHeight: 100,
@@ -227,7 +267,8 @@ const styles = StyleSheet.create({
         padding: 8
     },
     sectionItem: {
-        padding: 8
+        padding: 8,
+        marginBottom: 15
     },
     itemText: {
         color: Colors.white,
@@ -243,7 +284,8 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: 'bold',
         marginBottom: 16,
-        marginLeft: 16
+        marginLeft: 16,
+        textAlign: 'center'
     },
     btnFavorite: {
         padding: 8,
