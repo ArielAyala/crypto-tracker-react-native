@@ -8,6 +8,7 @@ API used for coins data [Coinlore API](https://www.coinlore.com/).
 API used for convert prices to Paraguayan currency [http://dolar.melizeche.com/api/1.0/](http://dolar.melizeche.com/api/1.0/) created by [melizeche](https://github.com/melizeche)
 
 ### RUN
+Clone the repo !
 ```
 cd crypto-tracker-react-native
 
