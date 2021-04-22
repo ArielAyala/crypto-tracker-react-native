@@ -22,7 +22,17 @@ npm run ios
 
 ```
 
-![](./img/coins.jpg =250x)
-
-
+<table cellspacing="0" cellpadding="0">
+  <tr>
+    <td valign="top">
+        <img src="img/coins.jpg" width="225" height="467">  
+    </td>
+    <td valign="top">
+        <img src="img/detail.jpg" width="225" height="467">
+    </td>
+    <td>
+      <img src="img/favorites.jpg" width="225" height="467">
+    </td>
+  </tr>
+</table>
 
