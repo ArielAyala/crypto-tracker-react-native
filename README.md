@@ -22,6 +22,7 @@ npm run ios
 
 ```
 
-<div align="center" style="display:flex">
-  <img src="img/coins.jpg" style="max-width: 225px">
-</div>
+![](./img/coins.jpg =250x)
+
+
+
